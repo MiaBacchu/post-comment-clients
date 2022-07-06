@@ -5,6 +5,7 @@ const Create = () => {
     const [title,setTitle]=useState('');
     const [description,setDescriptin]=useState('');
     const [image,setImage]=useState(null);
+    const [loading,setLoading]=useState(false);
     const user = JSON.parse(localStorage.getItem('mySimpleToggle'));
 
     const handlePost=(e)=>{
@@ -22,14 +23,27 @@ const Create = () => {
             method:'POST',
               body: formData
         })
+        .then( setLoading(true))
         .then(res=>res.json())
         .then(data=>{
             if (data.insertedId) {
+                setLoading(false);
                 alert('post successfull');
             }
         })
         e.target.reset();
        }
+       if (loading) {
+        return(
+            <div>
+            <p className='fs-1 fw-bold'>Posting...</p>
+            <p className='fs-3'>Please Wait</p>
+            <div class="spinner-grow" role="status">
+        <span class="visually-hidden"></span>
+        </div>
+        </div>
+        )
+    }
     return (
         <div className='App w-50 mx-auto'>
             <p className="fs-1">create a post</p>

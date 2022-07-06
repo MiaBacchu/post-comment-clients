@@ -2,17 +2,19 @@ import React, { useEffect, useState } from 'react';
 
 const Main = () => {
     const [statuses,setStatuses]=useState();
-    console.log(!statuses)
     const [comment,setComment]=useState('');
+    const [loading,setLoading]=useState(false);
+    const [call,setCall]=useState();
     const user = JSON.parse(localStorage.getItem('mySimpleToggle'));
     
     useEffect(()=>{
         fetch('https://desolate-fjord-19956.herokuapp.com/status')
         .then(res=>res.json())
         .then(data=>{
-            setStatuses(data)
+            setStatuses(data);
+            setLoading(false)
         })
-    },[statuses]);
+    },[call]);
 
     const handlePost=(id)=>{
         if (!user?.email) {
@@ -26,7 +28,11 @@ const Main = () => {
               },
             body:JSON.stringify({ name: user.name,comment})
         })
+        .then(setLoading(true))
         .then(res=>res.json())
+        .then(data=>{
+            setCall(true)
+        })
     }
     if (!statuses) {
         return(
@@ -48,17 +54,26 @@ const Main = () => {
                 <p className='text-dark fs-5 fw-bold'>{status.title}</p>
                 <p>{status.description}</p>
                 <img className='w-100 pb-3' src={`data:image/png;base64,${status.image}`} alt="this is img"/>
-                <div>{status.comments.map(comment=>
+                <div>
+                {loading ? <div>
+            <p className='fs-5'>Adding comment...depends your net speed</p>
+            <p className='fs-3'>Please Wait</p>
+            <div className="spinner-grow" role="status">
+        <span className="visually-hidden"></span>
+        </div>
+        </div>:status.comments.map(comment=>
                 <div>
                 <div className='d-flex justify-content-center text-dark pt-3'>
                 <p className='text-dark fs-6 fw-bold me-3'>{comment.name} </p>
                 <p >{comment.comment}</p>
                 </div>
                 </div>
-                )}</div>
+                )}
+                </div>
                 <form onSubmit={(e)=>{
                     e.preventDefault()
                     handlePost(status._id)
+                    e.target.reset()
                 }}>
                 <textarea required onChange={(e)=>setComment(e.target.value)} placeholder='write your comment'/>
                     <br />
